@@ -1,0 +1,1222 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>Math Quiz</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" href="logo.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#f5f0e8" />
+    <link href="fonts/fonts.css" rel="stylesheet" />
+    <style>
+      @font-face {
+        font-family: "FallbackMarker";
+        src: local("Permanent Marker"), local("Comic Sans MS"), local("Marker Felt");
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --paper: #f5f0e8;
+        --paper-dark: #e8e0d0;
+        --ink: #2c2c2c;
+        --ink-light: #666;
+        --red: #d63031;
+        --blue: #0984e3;
+        --yellow: #fdcb6e;
+        --green: #00b894;
+        --pink: #e84393;
+        --purple: #6c5ce7;
+        --doodle: #b2bec3;
+        --orange: #e17055;
+      }
+
+      html, body {
+        height: 100%;
+        height: 100dvh;
+        overflow: hidden;
+      }
+
+      body {
+        font-family: "Caveat", "Comic Sans MS", cursive;
+        background: var(--paper);
+        background-image: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 27px,
+          #d4ccbc 27px,
+          #d4ccbc 28px
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--ink);
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+        position: relative;
+        overscroll-behavior: none;
+        touch-action: none;
+      }
+
+      /* ── notebook margin line ── */
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 60px;
+        width: 2px;
+        background: #e88;
+        opacity: 0.4;
+        z-index: 0;
+      }
+
+      /* ── scattered doodles ── */
+      .doodle {
+        position: fixed;
+        font-size: 1.8rem;
+        opacity: 0.12;
+        z-index: 0;
+        pointer-events: none;
+        animation: doodleSpin 20s linear infinite;
+      }
+      .doodle:nth-child(1) { top: 5%; left: 8%; animation-duration: 25s; }
+      .doodle:nth-child(2) { top: 12%; right: 10%; animation-duration: 30s; animation-direction: reverse; font-size: 2.2rem; }
+      .doodle:nth-child(3) { bottom: 15%; left: 5%; animation-duration: 35s; font-size: 1.5rem; }
+      .doodle:nth-child(4) { bottom: 8%; right: 7%; animation-duration: 22s; animation-direction: reverse; }
+      .doodle:nth-child(5) { top: 45%; right: 3%; animation-duration: 40s; font-size: 2rem; }
+      .doodle:nth-child(6) { top: 70%; left: 3%; animation-duration: 28s; animation-direction: reverse; font-size: 1.3rem; }
+
+      @keyframes doodleSpin { to { transform: rotate(360deg); } }
+
+      /* ── stickers ── */
+      .sticker {
+        position: fixed;
+        font-size: 2.5rem;
+        z-index: 0;
+        pointer-events: none;
+        filter: drop-shadow(2px 2px 1px rgba(0,0,0,0.15));
+      }
+      .sticker:nth-child(7) { top: 3%; right: 15%; transform: rotate(15deg); }
+      .sticker:nth-child(8) { bottom: 4%; left: 12%; transform: rotate(-10deg); }
+      .sticker:nth-child(9) { top: 50%; left: 2%; transform: rotate(25deg); font-size: 2rem; }
+
+      /* ── tape strips ── */
+      .tape {
+        position: absolute;
+        width: 80px;
+        height: 22px;
+        background: rgba(255, 235, 180, 0.7);
+        z-index: 5;
+        pointer-events: none;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      }
+      .tape-tl { top: -10px; left: 10px; transform: rotate(-8deg); }
+      .tape-tr { top: -10px; right: 10px; transform: rotate(5deg); }
+
+      /* ── coffee stain ── */
+      .coffee-stain {
+        position: fixed;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        border: 8px solid rgba(139, 90, 43, 0.06);
+        pointer-events: none;
+        z-index: 0;
+        transform: rotate(15deg);
+      }
+
+      /* ── Main Container ── */
+      .game-wrapper {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 420px;
+        padding: clamp(10px, 3vw, 20px) clamp(10px, 3vw, 18px) clamp(10px, 3vw, 16px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: clamp(6px, 1.5vw, 10px);
+        background: #fff;
+        border-radius: 4px;
+        box-shadow:
+          3px 3px 0 var(--paper-dark),
+          6px 6px 0 #d5cfc5,
+          0 8px 30px rgba(0,0,0,0.12);
+        border: 1.5px solid #ccc;
+        transform: rotate(-0.8deg);
+        justify-content: center;
+        max-height: 98dvh;
+        max-height: 98vh;
+        overflow: visible;
+      }
+
+      /* ── margin note ── */
+      .margin-note {
+        position: absolute;
+        top: 8px;
+        left: -55px;
+        font-size: 0.7rem;
+        color: var(--red);
+        opacity: 0.3;
+        transform: rotate(-90deg);
+        white-space: nowrap;
+        font-family: "Caveat", cursive;
+        pointer-events: none;
+      }
+
+      /* ── Title ── */
+      .header {
+        text-align: center;
+        position: relative;
+        width: 100%;
+      }
+      .header h1 {
+        font-family: "Permanent Marker", "Rock Salt", "Comic Sans MS", cursive;
+        font-size: clamp(1.5rem, 6vw, 2rem);
+        color: var(--ink);
+        transform: rotate(-2deg);
+        position: relative;
+        display: inline-block;
+        line-height: 1.2;
+      }
+      .header h1::after {
+        content: "";
+        position: absolute;
+        bottom: 2px;
+        left: -4px;
+        right: -4px;
+        height: 10px;
+        background: var(--yellow);
+        opacity: 0.5;
+        z-index: -1;
+        transform: rotate(0.5deg) skewX(-3deg);
+        border-radius: 2px;
+      }
+      .header .subtitle {
+        font-size: 1.15rem;
+        color: var(--ink-light);
+        margin-top: 2px;
+        font-style: italic;
+      }
+      .header .arrow-doodle {
+        position: absolute;
+        top: -18px;
+        right: -35px;
+        font-size: 1.5rem;
+        transform: rotate(20deg);
+        opacity: 0.3;
+      }
+
+      /* ── Score tracker ── */
+      .score-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        font-size: 0.95rem;
+        color: var(--ink-light);
+      }
+      .score-bubble {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        background: var(--paper);
+        border: 1.5px solid #ccc;
+        border-radius: 3px;
+        padding: 4px 14px;
+        font-family: "Permanent Marker", cursive;
+        font-size: 1.3rem;
+        transform: rotate(-1deg);
+        box-shadow: 2px 2px 0 #ddd;
+      }
+      .score-bubble .dot {
+        width: 13px;
+        height: 13px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+      .dot-correct { background: var(--green); }
+      .dot-wrong   { background: var(--red); }
+      .sep {
+        font-size: 1.1rem;
+        opacity: 0.3;
+        font-family: "Caveat", cursive;
+      }
+      .q-label {
+        font-size: 0.85rem;
+        color: var(--ink-light);
+        font-style: italic;
+      }
+
+      /* ── Timer bar ── */
+      .timer-wrap {
+        width: 100%;
+        position: relative;
+      }
+      .timer-track {
+        width: 100%;
+        height: 10px;
+        background: var(--paper-dark);
+        border-radius: 3px;
+        border: 1.5px solid #ccc;
+        overflow: hidden;
+        position: relative;
+      }
+      .timer-bar {
+        height: 100%;
+        background: var(--green);
+        border-radius: 2px;
+        transition: width 0.1s linear, background 0.3s;
+        width: 100%;
+      }
+      .timer-bar.warn { background: var(--yellow); }
+      .timer-bar.danger { background: var(--red); }
+
+      /* ── Question card ── */
+      .question-wrap {
+        width: 100%;
+        text-align: center;
+        background: var(--paper);
+        border: 2px dashed #ccc;
+        border-radius: 4px;
+        padding: clamp(10px, 2.5vw, 16px) clamp(8px, 2vw, 14px);
+        position: relative;
+        min-height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .question-wrap::before {
+        content: "?";
+        position: absolute;
+        top: -10px;
+        left: 12px;
+        font-family: "Permanent Marker", cursive;
+        font-size: 1.1rem;
+        color: var(--blue);
+        background: #fff;
+        padding: 0 4px;
+        opacity: 0.6;
+      }
+
+      .op-badge {
+        font-size: 0.75rem;
+        font-family: "Caveat", cursive;
+        color: var(--ink-light);
+        font-style: italic;
+        letter-spacing: 0.03em;
+      }
+
+      .question-text {
+        font-family: "Permanent Marker", "Rock Salt", cursive;
+        font-size: clamp(1.6rem, 6vw, 2.2rem);
+        color: var(--ink);
+        line-height: 1.1;
+        animation: fadeSlideIn 0.3s ease-out;
+      }
+      @keyframes fadeSlideIn {
+        from { opacity: 0; transform: translateY(-8px) scale(0.95); }
+        to   { opacity: 1; transform: translateY(0)    scale(1); }
+      }
+
+      /* ── Options grid ── */
+      .options-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: clamp(6px, 1.5vw, 10px);
+        width: 100%;
+      }
+
+      .opt-btn {
+        padding: clamp(10px, 2.5vw, 14px) 8px;
+        border: 2.5px solid var(--ink);
+        border-radius: 3px;
+        font-family: "Permanent Marker", cursive;
+        font-size: clamp(1.1rem, 4vw, 1.5rem);
+        color: var(--ink);
+        background: #fff;
+        cursor: pointer;
+        box-shadow: 3px 3px 0 var(--ink);
+        transition: transform 0.1s, box-shadow 0.1s, background 0.1s;
+        touch-action: manipulation;
+        position: relative;
+        overflow: hidden;
+      }
+      .opt-btn:hover:not(:disabled) {
+        transform: translate(-1px, -1px);
+        box-shadow: 4px 4px 0 var(--ink);
+        background: rgba(108, 92, 231, 0.05);
+      }
+      .opt-btn:active:not(:disabled) {
+        transform: translate(2px, 2px);
+        box-shadow: 1px 1px 0 var(--ink);
+      }
+      .opt-btn:disabled {
+        cursor: default;
+      }
+      .opt-btn.correct {
+        background: var(--green);
+        color: #fff;
+        border-color: #008e70;
+        box-shadow: 3px 3px 0 #008e70;
+        animation: correctPop 0.35s cubic-bezier(0.17, 0.67, 0.24, 1.4);
+      }
+      .opt-btn.wrong {
+        background: var(--red);
+        color: #fff;
+        border-color: #a82321;
+        box-shadow: 3px 3px 0 #a82321;
+        animation: wrongShake 0.4s ease;
+      }
+      .opt-btn.dimmed {
+        opacity: 0.35;
+      }
+      @keyframes correctPop {
+        0%   { transform: scale(0.9); }
+        60%  { transform: scale(1.08); }
+        100% { transform: scale(1); }
+      }
+      @keyframes wrongShake {
+        0%, 100% { transform: translateX(0); }
+        20%      { transform: translateX(-6px); }
+        40%      { transform: translateX(6px); }
+        60%      { transform: translateX(-4px); }
+        80%      { transform: translateX(4px); }
+      }
+
+      /* option letter badge A B C D */
+      .opt-letter {
+        position: absolute;
+        top: 3px;
+        left: 5px;
+        font-family: "Caveat", cursive;
+        font-size: 0.7rem;
+        color: var(--ink-light);
+        opacity: 0.5;
+      }
+
+      /* ── Feedback strip ── */
+      .feedback {
+        font-family: "Permanent Marker", cursive;
+        font-size: 1.6rem;
+        font-weight: 700;
+        min-height: 1.8em;
+        height: 1.8em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--ink);
+        width: 100%;
+        text-align: center;
+        transition: color 0.2s;
+      }
+
+      /* ── Progress dots ── */
+      .progress-dots {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        justify-content: center;
+      }
+      .prog-dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        border: 2px solid #ccc;
+        background: transparent;
+        transition: background 0.3s, border-color 0.3s;
+        font-size: 0.55rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Caveat", cursive;
+      }
+      .prog-dot.done-correct  { background: var(--green); border-color: #008e70; }
+      .prog-dot.done-wrong    { background: var(--red);   border-color: #a82321; }
+      .prog-dot.current       { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(9,132,227,0.15); }
+
+      /* ── Start Screen overlay ── */
+      .start-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 200;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(245, 240, 232, 0.92);
+        backdrop-filter: blur(3px);
+      }
+      .start-overlay.hide {
+        display: none;
+      }
+
+      .start-box {
+        text-align: center;
+        padding: 34px 28px 28px;
+        background: #fff;
+        border: 2.5px solid var(--ink);
+        border-radius: 3px;
+        max-width: 280px;
+        width: 88%;
+        box-shadow:
+          4px 4px 0 var(--paper-dark),
+          8px 8px 0 #ccc;
+        position: relative;
+        transform: rotate(-1deg);
+        animation: paperSlam 0.4s cubic-bezier(0.17, 0.67, 0.24, 1.4);
+      }
+      /* tape on start card */
+      .start-box::before {
+        content: "";
+        position: absolute;
+        top: -12px;
+        left: 50%;
+        transform: translateX(-50%) rotate(-3deg);
+        width: 90px;
+        height: 22px;
+        background: rgba(255, 235, 180, 0.75);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+      }
+
+      .start-box .start-title {
+        font-family: "Permanent Marker", cursive;
+        font-size: 2rem;
+        color: var(--ink);
+        margin-bottom: 24px;
+        transform: rotate(-1deg);
+        display: inline-block;
+        position: relative;
+      }
+      .start-box .start-title::after {
+        content: "";
+        position: absolute;
+        bottom: 2px;
+        left: -4px;
+        right: -4px;
+        height: 10px;
+        background: var(--yellow);
+        opacity: 0.5;
+        z-index: -1;
+        border-radius: 2px;
+      }
+
+      .btn-start {
+        padding: 12px 36px;
+        border: 2.5px solid var(--ink);
+        border-radius: 3px;
+        font-size: 1.3rem;
+        font-weight: 700;
+        cursor: pointer;
+        color: var(--ink);
+        background: var(--green);
+        box-shadow: 3px 3px 0 var(--ink);
+        transition: all 0.1s;
+        font-family: "Permanent Marker", cursive;
+        transform: rotate(-1deg);
+        touch-action: manipulation;
+        color: #fff;
+      }
+      .btn-start:hover {
+        transform: rotate(0deg) translate(-1px, -1px);
+        box-shadow: 4px 4px 0 var(--ink);
+      }
+      .btn-start:active {
+        transform: translate(2px, 2px);
+        box-shadow: 1px 1px 0 var(--ink);
+      }
+
+      /* ── game content hidden until started ── */
+      .game-content {
+        display: contents;
+      }
+      .game-content.hidden > * {
+        visibility: hidden;
+      }
+
+      /* ── Overlay ── */
+      .overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(245, 240, 232, 0.88);
+        backdrop-filter: blur(3px);
+      }
+      .overlay.show { display: flex; }
+
+      .result-box {
+        text-align: center;
+        padding: 28px 24px 24px;
+        background: #fff;
+        border: 2.5px solid var(--ink);
+        border-radius: 3px;
+        animation: paperSlam 0.4s cubic-bezier(0.17, 0.67, 0.24, 1.4);
+        max-width: 300px;
+        width: 88%;
+        box-shadow:
+          4px 4px 0 var(--paper-dark),
+          8px 8px 0 #ccc;
+        position: relative;
+        transform: rotate(1.5deg);
+      }
+      /* tape on result card */
+      .result-box::before {
+        content: "";
+        position: absolute;
+        top: -12px;
+        left: 50%;
+        transform: translateX(-50%) rotate(-3deg);
+        width: 90px;
+        height: 22px;
+        background: rgba(255, 235, 180, 0.75);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+      }
+      @keyframes paperSlam {
+        from { opacity: 0; transform: rotate(-8deg) scale(0.4) translateY(-60px); }
+        to   { opacity: 1; transform: rotate(1.5deg) scale(1) translateY(0); }
+      }
+
+      .result-box .emoji {
+        font-size: 3.2rem;
+        display: block;
+        margin-bottom: 8px;
+        animation: wobble 1.5s ease infinite;
+      }
+      @keyframes wobble {
+        0%, 100% { transform: rotate(0); }
+        15%  { transform: rotate(12deg); }
+        30%  { transform: rotate(-10deg); }
+        45%  { transform: rotate(6deg); }
+        60%  { transform: rotate(-4deg); }
+        75%  { transform: rotate(2deg); }
+      }
+
+      .result-box .result-title {
+        font-family: "Permanent Marker", cursive;
+        font-size: 1.8rem;
+        margin-bottom: 12px;
+      }
+      .result-box .result-score {
+        font-family: "Permanent Marker", cursive;
+        font-size: 1.15rem;
+        color: var(--ink-light);
+        margin-bottom: 20px;
+      }
+
+      .btn-replay {
+        padding: 10px 32px;
+        border: 2.5px solid var(--ink);
+        border-radius: 3px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        color: var(--ink);
+        background: var(--yellow);
+        box-shadow: 3px 3px 0 var(--ink);
+        transition: all 0.1s;
+        font-family: "Permanent Marker", cursive;
+        transform: rotate(-1deg);
+        touch-action: manipulation;
+      }
+      .btn-replay:hover {
+        transform: rotate(0deg) translate(-1px, -1px);
+        box-shadow: 4px 4px 0 var(--ink);
+      }
+      .btn-replay:active {
+        transform: translate(2px, 2px);
+        box-shadow: 1px 1px 0 var(--ink);
+      }
+
+      /* ── Confetti ── */
+      #confetti {
+        position: fixed;
+        inset: 0;
+        z-index: 99;
+        pointer-events: none;
+      }
+
+      /* ── Shake animation ── */
+      @keyframes shake {
+        0%, 100% { transform: translateX(0) rotate(-0.8deg); }
+        20%       { transform: translateX(-8px) rotate(-2deg); }
+        40%       { transform: translateX(8px) rotate(0.5deg); }
+        60%       { transform: translateX(-5px) rotate(-1.5deg); }
+        80%       { transform: translateX(5px) rotate(0deg); }
+      }
+      .shake { animation: shake 0.5s ease; }
+
+      /* ── ink splat ── */
+      .ink-splat {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 10;
+        animation: splatFade 0.5s ease-out forwards;
+      }
+      @keyframes splatFade {
+        0%   { opacity: 0.6; transform: scale(1); }
+        100% { opacity: 0;   transform: scale(2.5); }
+      }
+
+      /* Responsive tweaks */
+      @media (max-height: 600px) {
+        .game-wrapper { gap: 4px; }
+        .question-wrap { padding: 8px; min-height: 56px; }
+        .opt-btn { padding: 8px 6px; }
+        .header h1 { font-size: 1.4rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- scattered notebook doodles -->
+    <span class="doodle">➕</span>
+    <span class="doodle">✖</span>
+    <span class="doodle">➗</span>
+    <span class="doodle">➖</span>
+    <span class="doodle">∞</span>
+    <span class="doodle">📐</span>
+
+    <!-- stickers -->
+    <span class="sticker">🧮</span>
+    <span class="sticker">🤓</span>
+    <span class="sticker" style="font-size:1.8rem">✏️</span>
+
+    <!-- coffee ring stain -->
+    <div class="coffee-stain" style="bottom:10%;right:8%"></div>
+
+    <canvas id="confetti"></canvas>
+
+    <!-- ── Start Screen ── -->
+    <div class="start-overlay" id="startOverlay">
+      <div class="start-box">
+        <div class="start-title">math quiz!</div>
+        <button class="btn-start" id="btnStart">let's go!! 🚀</button>
+      </div>
+    </div>
+
+    <div class="game-wrapper" id="gameWrapper">
+      <div class="tape tape-tl"></div>
+      <div class="tape tape-tr"></div>
+      <span class="margin-note">← my quiz</span>
+
+      <!-- Header -->
+      <div class="header">
+        <h1>math quiz!</h1>
+        <div class="subtitle">( 5 questions · 3 sec each )</div>
+        <span class="arrow-doodle">↗</span>
+      </div>
+
+      <!-- Score row -->
+      <div class="score-row">
+        <div class="score-bubble">
+          <span class="dot dot-correct"></span>
+          <span id="scoreCorrect">0</span>
+        </div>
+        <span class="sep">|</span>
+        <div class="score-bubble" style="transform:rotate(1deg)">
+          <span class="dot dot-wrong"></span>
+          <span id="scoreWrong">0</span>
+        </div>
+        <span class="q-label" id="qLabel">Q 1 / 5</span>
+      </div>
+
+      <!-- Timer -->
+      <div class="timer-wrap">
+        <div class="timer-track">
+          <div class="timer-bar" id="timerBar"></div>
+        </div>
+      </div>
+
+      <!-- Question -->
+      <div class="question-wrap">
+        <div class="op-badge" id="opBadge">addition</div>
+        <div class="question-text" id="questionText">?</div>
+      </div>
+
+      <!-- Options -->
+      <div class="options-grid" id="optionsGrid">
+        <button class="opt-btn" id="opt0"><span class="opt-letter">A</span><span class="opt-val"></span></button>
+        <button class="opt-btn" id="opt1"><span class="opt-letter">B</span><span class="opt-val"></span></button>
+        <button class="opt-btn" id="opt2"><span class="opt-letter">C</span><span class="opt-val"></span></button>
+        <button class="opt-btn" id="opt3"><span class="opt-letter">D</span><span class="opt-val"></span></button>
+      </div>
+
+      <!-- Feedback -->
+      <div class="feedback" id="feedback"></div>
+
+      <!-- Progress dots -->
+      <div class="progress-dots" id="progressDots"></div>
+
+    </div>
+
+    <!-- Result Overlay -->
+    <div class="overlay" id="overlay">
+      <div class="result-box" id="resultBox">
+        <span class="emoji" id="resultEmoji">🎉</span>
+        <div class="result-title" id="resultTitle">You Won!</div>
+        <div class="result-score" id="resultScore">3 / 5 correct</div>
+        <button class="btn-replay" id="btnReplay">play again!! ✏️</button>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+
+        /* ══════════════════════════════════════════
+           CONFIG
+        ══════════════════════════════════════════ */
+        const TOTAL_QUESTIONS = 5;
+        const TIME_PER_Q      = 3;        // seconds
+        const WIN_THRESHOLD   = 3;        // correct answers needed to win
+
+        /* ══════════════════════════════════════════
+           STATE
+        ══════════════════════════════════════════ */
+        let currentQ        = 0;   // 0-indexed
+        let correctCount    = 0;
+        let wrongCount      = 0;
+        let answered        = false;
+        let timerTick       = null;
+        let timeLeft        = TIME_PER_Q;
+        let results         = [];  // 'correct' | 'wrong' per question
+        let currentRoundOps = [];  // planned operations for the 5 questions
+
+        /* ══════════════════════════════════════════
+           DOM refs
+        ══════════════════════════════════════════ */
+        const $  = id => document.getElementById(id);
+        const gameWrapper  = $("gameWrapper");
+        const questionText = $("questionText");
+        const opBadge      = $("opBadge");
+        const optionsGrid  = $("optionsGrid");
+        const timerBar     = $("timerBar");
+        const feedback     = $("feedback");
+        const scoreCorrect = $("scoreCorrect");
+        const scoreWrong   = $("scoreWrong");
+        const qLabel       = $("qLabel");
+        const progressDots = $("progressDots");
+        const overlay      = $("overlay");
+        const resultEmoji  = $("resultEmoji");
+        const resultTitle  = $("resultTitle");
+        const resultScore  = $("resultScore");
+        const btnReplay    = $("btnReplay");
+        const btnStart     = $("btnStart");
+        const startOverlay = $("startOverlay");
+
+        /* ══════════════════════════════════════════
+           QUESTION GENERATOR
+           Round structure:
+           - Exactly 3 questions of (+, −)
+           - Exactly 2 questions of (×, ÷)
+           - Difficulty scales with question index
+        ══════════════════════════════════════════ */
+        const OPS = ["+", "−", "×", "÷"];
+        const OP_NAMES = { "+": "addition", "−": "subtraction", "×": "multiplication", "÷": "division" };
+
+        function initRoundOps() {
+          // Exactly 3 questions from (+, −)
+          const pm = ["+", "−"];
+          const pmOps = [
+            pm[Math.floor(Math.random() * 2)],
+            pm[Math.floor(Math.random() * 2)],
+            pm[Math.floor(Math.random() * 2)]
+          ];
+          if (!pmOps.includes("+")) pmOps[0] = "+";
+          if (!pmOps.includes("−")) pmOps[1] = "−";
+
+          // Exactly 2 questions from (×, ÷)
+          const mdOps = ["×", "÷"];
+          if (Math.random() < 0.5) mdOps.reverse();
+
+          // 3 (+/−) + 2 (×/÷) = 5 questions, shuffled for variety
+          currentRoundOps = [...pmOps, ...mdOps].sort(() => Math.random() - 0.5);
+        }
+
+        function pickOp(qIdx) {
+          if (currentRoundOps[qIdx]) return currentRoundOps[qIdx];
+          return OPS[Math.floor(Math.random() * 4)];
+        }
+
+        function rand(min, max) {
+          return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function generateQuestion(qIdx) {
+          const op = pickOp(qIdx);
+          let a, b, answer;
+
+          if (op === "+") {
+            // Q0: 10-30 | Q1: 20-60 | Q2: 30-99 | Q3: 50-150 | Q4: 80-199
+            const ranges = [[10,30],[20,60],[30,99],[50,150],[80,199]];
+            const r = ranges[Math.min(qIdx, 4)];
+            a = rand(r[0], r[1]);
+            b = rand(r[0], r[1]);
+            answer = a + b;
+          } else if (op === "−") {
+            // Same ranges but ensure no negatives
+            const ranges = [[10,30],[20,60],[30,99],[50,150],[80,199]];
+            const r = ranges[Math.min(qIdx, 4)];
+            a = rand(r[0], r[1]);
+            b = rand(r[0], a);
+            answer = a - b;
+          } else if (op === "×") {
+            // Q0: 2-5 × 2-5 | Q1: 3-8 × 2-6 | Q2: 4-9 × 3-7 | Q3: 6-12 × 3-8 | Q4: 7-15 × 4-9
+            const tables = [[2,5],[3,8],[4,9],[6,12],[7,15]];
+            const bMax  = [5,   6,   7,   8,    9];
+            const t = tables[Math.min(qIdx, 4)];
+            a = rand(t[0], t[1]);
+            b = rand(2, bMax[Math.min(qIdx, 4)]);
+            answer = a * b;
+          } else { // ÷
+            // Always whole-number. Q0: divisor 2-5, result 3-8 | ... | Q4: divisor 4-9, result 6-15
+            const divisors = [[2,5],[2,6],[3,7],[4,8],[4,9]];
+            const resMax   = [8,   10,  12,  13,  15];
+            const d = divisors[Math.min(qIdx, 4)];
+            b = rand(d[0], d[1]);
+            answer = rand(3, resMax[Math.min(qIdx, 4)]);
+            a = b * answer;
+          }
+
+          return { a, b, op, answer };
+        }
+
+        /* ══════════════════════════════════════════
+           WRONG OPTION GENERATOR
+           Generates 3 plausible wrong answers
+        ══════════════════════════════════════════ */
+        function generateOptions(answer) {
+          const opts = new Set([answer]);
+          const spread = Math.max(3, Math.floor(Math.abs(answer) * 0.3));
+
+          while (opts.size < 4) {
+            let delta = rand(1, Math.max(spread, 4));
+            if (Math.random() < 0.5) delta = -delta;
+            const candidate = answer + delta;
+            if (candidate > 0) opts.add(candidate);  // keep positive
+          }
+          // Shuffle
+          return [...opts].sort(() => Math.random() - 0.5);
+        }
+
+        /* ══════════════════════════════════════════
+           BUILD PROGRESS DOTS
+        ══════════════════════════════════════════ */
+        function buildProgressDots() {
+          progressDots.innerHTML = "";
+          for (let i = 0; i < TOTAL_QUESTIONS; i++) {
+            const dot = document.createElement("div");
+            dot.className = "prog-dot" + (i === currentQ ? " current" : "");
+            if (results[i] === "correct") dot.classList.replace("prog-dot", "prog-dot"), dot.classList.add("done-correct");
+            if (results[i] === "wrong")   dot.classList.add("done-wrong");
+            progressDots.appendChild(dot);
+          }
+        }
+
+        /* ══════════════════════════════════════════
+           TIMER
+        ══════════════════════════════════════════ */
+        function startTimer() {
+          timeLeft = TIME_PER_Q;
+          updateTimerUI();
+          clearInterval(timerTick);
+          timerTick = setInterval(() => {
+            timeLeft -= 0.1;
+            if (timeLeft <= 0) {
+              timeLeft = 0;
+              updateTimerUI();
+              clearInterval(timerTick);
+              if (!answered) onTimeOut();
+            } else {
+              updateTimerUI();
+            }
+          }, 100);
+        }
+
+        function stopTimer() {
+          clearInterval(timerTick);
+        }
+
+        function updateTimerUI() {
+          const pct = timeLeft / TIME_PER_Q;
+          timerBar.style.width = (pct * 100) + "%";
+          timerBar.classList.remove("warn", "danger");
+          if (pct <= 0.4 && pct > 0.2)      timerBar.classList.add("warn");
+          else if (pct <= 0.2)               timerBar.classList.add("danger");
+        }
+
+        function onTimeOut() {
+          answered = true;
+          disableOptions();
+          feedback.textContent = "⏰ time's up!";
+          feedback.style.color = "var(--red)";
+          results[currentQ] = "wrong";
+          wrongCount++;
+          scoreWrong.textContent = wrongCount;
+          gameWrapper.classList.add("shake");
+          setTimeout(() => gameWrapper.classList.remove("shake"), 500);
+          highlightCorrectAnswer();
+          setTimeout(() => nextQuestion(), 1200);
+        }
+
+        /* ══════════════════════════════════════════
+           LOAD QUESTION
+        ══════════════════════════════════════════ */
+        let currentAnswer;
+
+        function loadQuestion() {
+          answered = false;
+          feedback.textContent = "";
+          feedback.style.color = "var(--ink)";
+
+          qLabel.textContent = "Q " + (currentQ + 1) + " / " + TOTAL_QUESTIONS;
+          buildProgressDots();
+
+          const q = generateQuestion(currentQ);
+          currentAnswer = q.answer;
+
+          opBadge.textContent = OP_NAMES[q.op];
+          questionText.textContent = q.a + " " + q.op + " " + q.b + " = ?";
+          // Trigger re-animation
+          questionText.style.animation = "none";
+          void questionText.offsetWidth;
+          questionText.style.animation = "";
+
+          const opts = generateOptions(currentAnswer);
+          const letters = ["A","B","C","D"];
+          opts.forEach((val, i) => {
+            const btn = $("opt" + i);
+            btn.className = "opt-btn";
+            btn.disabled = false;
+            btn.querySelector(".opt-letter").textContent = letters[i];
+            btn.querySelector(".opt-val").textContent = val;
+            btn.dataset.value = val;
+          });
+
+          startTimer();
+        }
+
+        /* ══════════════════════════════════════════
+           OPTION CLICK
+        ══════════════════════════════════════════ */
+        function inkSplatter(el, color) {
+          for (let i = 0; i < 5; i++) {
+            const s = document.createElement("div");
+            s.className = "ink-splat";
+            s.style.background = color;
+            s.style.left  = 20 + Math.random() * 60 + "%";
+            s.style.top   = 20 + Math.random() * 60 + "%";
+            s.style.width = 3 + Math.random() * 6 + "px";
+            s.style.height = s.style.width;
+            el.appendChild(s);
+            setTimeout(() => s.remove(), 500);
+          }
+        }
+
+        function disableOptions() {
+          for (let i = 0; i < 4; i++) $("opt" + i).disabled = true;
+        }
+
+        function highlightCorrectAnswer() {
+          for (let i = 0; i < 4; i++) {
+            const btn = $("opt" + i);
+            if (parseInt(btn.dataset.value) === currentAnswer) {
+              btn.classList.add("correct");
+            }
+          }
+        }
+
+        function onOptionClick(e) {
+          if (answered) return;
+          const btn = e.currentTarget;
+          const chosen = parseInt(btn.dataset.value);
+
+          answered = true;
+          stopTimer();
+          disableOptions();
+
+          if (chosen === currentAnswer) {
+            btn.classList.add("correct");
+            inkSplatter(btn, "#00b89444");
+            feedback.textContent = pickFrom(["✅ correct!", "🎉 nice!", "🔥 yes!", "💪 got it!", "⭐ nailed it!"]);
+            feedback.style.color = "var(--green)";
+            results[currentQ] = "correct";
+            correctCount++;
+            scoreCorrect.textContent = correctCount;
+          } else {
+            btn.classList.add("wrong");
+            inkSplatter(btn, "#d6303144");
+            // dim other wrong buttons
+            for (let i = 0; i < 4; i++) {
+              const b = $("opt" + i);
+              if (parseInt(b.dataset.value) !== currentAnswer && b !== btn) b.classList.add("dimmed");
+            }
+            highlightCorrectAnswer();
+            feedback.textContent = pickFrom(["❌ nope!", "😬 wrong!", "💀 bruh!", "😅 not quite!", "🤭 oops!"]);
+            feedback.style.color = "var(--red)";
+            results[currentQ] = "wrong";
+            wrongCount++;
+            scoreWrong.textContent = wrongCount;
+            gameWrapper.classList.add("shake");
+            setTimeout(() => gameWrapper.classList.remove("shake"), 500);
+          }
+
+          buildProgressDots();
+          setTimeout(() => nextQuestion(), 1100);
+        }
+
+        function pickFrom(arr) {
+          return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        /* ══════════════════════════════════════════
+           NEXT QUESTION / END GAME
+        ══════════════════════════════════════════ */
+        function nextQuestion() {
+          currentQ++;
+          if (currentQ >= TOTAL_QUESTIONS) {
+            endGame();
+          } else {
+            loadQuestion();
+          }
+        }
+
+        function endGame() {
+          buildProgressDots();
+          const won = correctCount >= WIN_THRESHOLD;
+
+          if (won) {
+            resultEmoji.textContent  = pickFrom(["🎉","🏆","🥳","⭐","👑","✨"]);
+            resultTitle.textContent  = pickFrom(["You Won!","VICTORY!","Math Wizard!","yasss!","Champion!"]);
+            resultTitle.style.color  = "var(--green)";
+            launchConfetti();
+          } else {
+            resultEmoji.textContent  = pickFrom(["💀","😤","📉","😵","🫠"]);
+            resultTitle.textContent  = pickFrom(["So close...","Bruh","Try again!","Oops!","Not quite!"]);
+            resultTitle.style.color  = "var(--red)";
+            gameWrapper.classList.add("shake");
+            setTimeout(() => gameWrapper.classList.remove("shake"), 500);
+          }
+
+          resultScore.textContent = correctCount + " / " + TOTAL_QUESTIONS + " correct";
+          setTimeout(() => overlay.classList.add("show"), 500);
+        }
+
+        /* ══════════════════════════════════════════
+           RESET / INIT
+        ══════════════════════════════════════════ */
+        function resetGame() {
+          currentQ     = 0;
+          correctCount = 0;
+          wrongCount   = 0;
+          answered     = false;
+          results      = [];
+          scoreCorrect.textContent = "0";
+          scoreWrong.textContent   = "0";
+          overlay.classList.remove("show");
+          confettiRunning = false;
+          ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+          initRoundOps();
+          loadQuestion();
+        }
+
+        // Wire option clicks
+        for (let i = 0; i < 4; i++) {
+          $("opt" + i).addEventListener("click", onOptionClick);
+        }
+        btnReplay.addEventListener("click", resetGame);
+
+        // ── Start button ──
+        btnStart.addEventListener("click", function () {
+          startOverlay.classList.add("hide");
+          initRoundOps();
+          loadQuestion();
+        });
+
+        /* ══════════════════════════════════════════
+           CONFETTI
+        ══════════════════════════════════════════ */
+        const confettiCanvas = $("confetti");
+        const ctx = confettiCanvas.getContext("2d");
+        let confettiPieces = [], confettiRunning = false;
+
+        function resizeConfetti() {
+          confettiCanvas.width  = window.innerWidth;
+          confettiCanvas.height = window.innerHeight;
+        }
+
+        function launchConfetti() {
+          resizeConfetti();
+          confettiPieces = [];
+          const colors = ["#d63031","#fdcb6e","#6c5ce7","#00b894","#e84393","#0984e3","#fab1a0","#55efc4"];
+          for (let i = 0; i < 100; i++) {
+            confettiPieces.push({
+              x: Math.random() * confettiCanvas.width,
+              y: -20 - Math.random() * 300,
+              w: 4 + Math.random() * 8,
+              h: 3 + Math.random() * 6,
+              color: colors[Math.floor(Math.random() * colors.length)],
+              vx: (Math.random() - 0.5) * 4,
+              vy: 2 + Math.random() * 3,
+              rot: Math.random() * 360,
+              rotSpeed: (Math.random() - 0.5) * 12,
+              gravity: 0.06 + Math.random() * 0.04,
+              opacity: 1,
+              shape: Math.random() > 0.4 ? "rect" : "circle",
+            });
+          }
+          confettiRunning = true;
+          animateConfetti();
+        }
+
+        function animateConfetti() {
+          if (!confettiRunning) return;
+          ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+          let alive = 0;
+          for (const p of confettiPieces) {
+            p.vy += p.gravity;
+            p.x  += p.vx;
+            p.y  += p.vy;
+            p.rot += p.rotSpeed;
+            if (p.y > confettiCanvas.height + 20) p.opacity -= 0.02;
+            if (p.opacity <= 0) continue;
+            alive++;
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate((p.rot * Math.PI) / 180);
+            ctx.globalAlpha = p.opacity;
+            ctx.fillStyle   = p.color;
+            if (p.shape === "rect") ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+            else { ctx.beginPath(); ctx.arc(0, 0, p.w / 2, 0, Math.PI * 2); ctx.fill(); }
+            ctx.restore();
+          }
+          if (alive > 0) requestAnimationFrame(animateConfetti);
+          else { confettiRunning = false; ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height); }
+        }
+
+        window.addEventListener("resize", resizeConfetti);
+        resizeConfetti();
+
+      })();
+    </script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker.register("./sw.js").catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>
